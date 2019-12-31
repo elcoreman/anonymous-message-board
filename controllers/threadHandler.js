@@ -2,13 +2,14 @@ const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectID;
 const DatabaseURI = process.env.DATABASE_URI;
 const assert = require("chai").assert;
+const DB = "test3";
 
 module.exports = () => {
   this.threadList = (req, res) => {
     let board = req.params.board;
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
-      let col = client.db("test").collection(board);
+      let col = client.db(DB).collection(board);
       col
         .find(
           {},
@@ -40,7 +41,7 @@ module.exports = () => {
     let delete_password = req.body.delete_password;
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
-      let col = client.db("test").collection(board);
+      let col = client.db(DB).collection(board);
       col.insertOne(
         {
           text,
@@ -59,8 +60,36 @@ module.exports = () => {
   };
   this.reportThreat = (req, res) => {
     let board = req.params.board;
+    MongoClient.connect(DatabaseURI, (err, client) => {
+      assert.equal(null, err);
+      let col = client.db(DB).collection(board);
+      col.findOneAndUpdate(
+        {
+          _id: new ObjectId(req.body.report_id)
+        },
+        { $set: { reported: true } },
+        (err, thread) => {
+          assert.equal(null, err);
+          res.send("reported");
+        }
+      );
+    });
   };
   this.deleteThreat = (req, res) => {
     let board = req.params.board;
+    MongoClient.connect(DatabaseURI, (err, client) => {
+      assert.equal(null, err);
+      let col = client.db(DB).collection(board);
+      col.findOneAndUpdate(
+        {
+          _id: new ObjectId(req.body.report_id)
+        },
+        { $set: { reported: true } },
+        (err, thread) => {
+          assert.equal(null, err);
+          res.send("reported");
+        }
+      );
+    });
   };
 };
