@@ -22,7 +22,7 @@ suite("Functional Tests", function() {
         chai
           .request(server)
           .post("/api/threads/test")
-          .send({ text: "text2", delete_password: "pass2" })
+          .send({ text: "text2", delete_password: "pass" })
           .end((err, res) => {
             assert.equal(err, null);
             assert.equal(res.status, 200);
@@ -138,11 +138,9 @@ suite("Functional Tests", function() {
             assert.isArray(res.body.replies);
             assert.notProperty(res.body.replies[0], "delete_password");
             assert.notProperty(res.body.replies[0], "reported");
-            assert.equal(
-              res.body.replies[res.body.replies.length - 1].text,
-              "text3"
-            );
+            assert.equal(res.body.replies[0].text, "text3");
             id3 = res.body.replies[0]._id;
+            console.log("AA", id1, id2, id3);
             done();
           });
       });
@@ -152,7 +150,7 @@ suite("Functional Tests", function() {
       test("report reply", done => {
         chai
           .request(server)
-          .put("/api/threads/test")
+          .put("/api/replies/test")
           .send({ thread_id: id2, reply_id: id3 })
           .end((err, res) => {
             assert.equal(err, null);
@@ -167,7 +165,7 @@ suite("Functional Tests", function() {
       test("delete reply with bad password", done => {
         chai
           .request(server)
-          .delete("/api/threads/test")
+          .delete("/api/replies/test")
           .send({
             thread_id: id2,
             reply_id: id3,
@@ -184,7 +182,7 @@ suite("Functional Tests", function() {
       test("delete reply with valid password", done => {
         chai
           .request(server)
-          .delete("/api/threads/test")
+          .delete("/api/replies/test")
           .send({
             thread_id: id2,
             reply_id: id3,
