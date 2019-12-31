@@ -1,16 +1,11 @@
-/*
-*
-*
-*       Complete the API routing below
-*
-*
-*/
-
 'use strict';
 
-var expect = require('chai').expect;
+const ThreatHandler = require('../controllers/threatHandler.js');
+const ReplyHandler = require('../controllers/replyHandler.js');
 
 module.exports = function (app) {
+  let threatHandler = new ThreatHandler();
+  let replyHandler = new ReplyHandler();
   
   app.route('/api/threads/:board');
     
