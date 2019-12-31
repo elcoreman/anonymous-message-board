@@ -4,7 +4,7 @@ const ThreadHandler = require("../controllers/threadHandler.js");
 const ReplyHandler = require("../controllers/replyHandler.js");
 
 module.exports = function(app) {
-  var threadHandler = new ThreadHandler();//
+  let threadHandler = new ThreadHandler();
   let replyHandler = new ReplyHandler();
 
   app
