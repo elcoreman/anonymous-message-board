@@ -5,9 +5,10 @@ const assert = require("chai").assert;
 
 module.exports = () => {
   this.threadList = (req, res) => {
+    let board = req.params.board;
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
-      let col = client.db("test").collection("threads");
+      let col = client.db("test").collection(board);
       col
         .find(
           {},
@@ -34,14 +35,32 @@ module.exports = () => {
     });
   };
   this.newThreat = (req, res) => {
+    let board = req.params.board;
     let text = req.body.text;
-    
+    let delete_password = req.body.delete_password;
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
-      let col = client.db("test").collection("threads");
-      col.insertOne();
+      let col = client.db("test").collection(board);
+      col.insertOne(
+        {
+          text,
+          delete_password,
+          created_on: new Date(),
+          bumped_on: new Date(),
+          replies: [],
+          reported: false
+        },
+        (err, thread) => {
+          assert.equal(null, err);
+          res.redirect("/b/" + board);
+        }
+      );
     });
   };
-  this.reportThreat = (req, res) => {};
-  this.deleteThreat = (req, res) => {};
+  this.reportThreat = (req, res) => {
+    let board = req.params.board;
+  };
+  this.deleteThreat = (req, res) => {
+    let board = req.params.board;
+  };
 };
