@@ -4,7 +4,7 @@ const DatabaseURI = process.env.DATABASE_URI;
 const assert = require("chai").assert;
 const DB = "test3";
 
-module.exports = () => {
+function ReplyHandler() {
   this.replyList = (req, res) => {
     let board = req.params.board;
     MongoClient.connect(DatabaseURI, (err, client) => {
@@ -78,14 +78,19 @@ module.exports = () => {
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
       let col = client.db(DB).collection(board);
-      col.findOneAndDelete(
+      col.findOneAndUpdate(
         {
           _id: new ObjectId(req.body.thread_id),
-          replies: { $elemMatch: { _id: new ObjectId(req.body.reply_id), delete_password: req.body.delete_password } }
+          replies: {
+            $elemMatch: {
+              _id: new ObjectId(req.body.reply_id),
+              delete_password: req.body.delete_password
+            }
+          }
         },
         {
-          { $set: { "replies.$.text": "[deleted]" } }
-        }
+          $set: { "replies.$.text": "[deleted]" }
+        },
         (err, doc) => {
           assert.equal(null, err);
           if (doc.value === null) res.send("incorrect password");
@@ -94,4 +99,6 @@ module.exports = () => {
       );
     });
   };
-};
+}
+
+module.exports = ReplyHandler;

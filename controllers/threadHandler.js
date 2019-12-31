@@ -4,7 +4,7 @@ const DatabaseURI = process.env.DATABASE_URI;
 const assert = require("chai").assert;
 const DB = "test3";
 
-module.exports = () => {
+function ThreadHandler() {
   this.threadList = (req, res) => {
     let board = req.params.board;
     MongoClient.connect(DatabaseURI, (err, client) => {
@@ -90,4 +90,6 @@ module.exports = () => {
       );
     });
   };
-};
+}
+
+module.exports = ThreadHandler;

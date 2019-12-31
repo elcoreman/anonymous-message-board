@@ -1,4 +1,4 @@
-//"use strict";
+"use strict";
 
 const ThreadHandler = require("../controllers/threadHandler.js");
 const ReplyHandler = require("../controllers/replyHandler.js");
@@ -9,7 +9,7 @@ module.exports = function(app) {
 
   app
     .route("/api/threads/:board")
-    .get(threadHandler.threatList)
+    .get(threadHandler.threadList)
     .post(threadHandler.newThreat)
     .put(threadHandler.reportThreat)
     .delete(threadHandler.deleteThreat);
