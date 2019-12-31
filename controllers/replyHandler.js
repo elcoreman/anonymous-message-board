@@ -12,7 +12,7 @@ module.exports = () => {
       let col = client.db(DB).collection(board);
       col
         .find(
-          {_id: req.body.},
+          { _id: new ObjectId(req.query.thread_id) },
           {
             projection: {
               reported: 0,
@@ -22,15 +22,9 @@ module.exports = () => {
             }
           }
         )
-        .sort("bumped_on", -1)
-        .limit(10)
         .toArray((err, docs) => {
           assert.equal(null, err);
-          docs.forEach(doc => {
-            doc.replycount = doc.replies.length;
-            if (doc.replies.length > 3) doc.replies = doc.replies.slice(-3);
-          });
-          res.json(docs);
+          res.json(docs[0]);
         });
     });
   };
@@ -39,18 +33,24 @@ module.exports = () => {
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
       let col = client.db(DB).collection(board);
-      col.insertOne(
+      col.findOneAndUpdate(
         {
-          text: req.body.text,
-          delete_password: req.body.delete_password,
-          created_on: new Date(),
-          bumped_on: new Date(),
-          replies: [],
-          reported: false
+          _id: new ObjectId(req.body.thread_id)
+        },
+        {
+          $set: { bumped_on: new Date() },
+          $push: {
+            replies: {
+              text: req.body.text,
+              created_on: new Date(),
+              reported: false,
+              delete_password: req.body.delete_password
+            }
+          }
         },
         (err, doc) => {
           assert.equal(null, err);
-          res.redirect("/b/" + board);
+          res.redirect("/b/" + board + "/" + req.body.thread_id);
         }
       );
     });
@@ -62,9 +62,10 @@ module.exports = () => {
       let col = client.db(DB).collection(board);
       col.findOneAndUpdate(
         {
-          _id: new ObjectId(req.body.report_id)
+          _id: new ObjectId(req.body.thread_id),
+          "replies._id": new ObjectId(req.body.reply_id)
         },
-        { $set: { reported: true } },
+        { $set: { "replies.$.reported": true } },
         (err, doc) => {
           assert.equal(null, err);
           res.send("reported");
@@ -79,9 +80,12 @@ module.exports = () => {
       let col = client.db(DB).collection(board);
       col.findOneAndDelete(
         {
-          _id: new ObjectId(req.body.report_id),
-          delete_password: req.body.delete_password
+          _id: new ObjectId(req.body.thread_id),
+          replies: { $elemMatch: { _id: new ObjectId(req.body.reply_id), delete_password: req.body.delete_password } }
         },
+        {
+          { $set: { "replies.$.text": "[deleted]" } }
+        }
         (err, doc) => {
           assert.equal(null, err);
           if (doc.value === null) res.send("incorrect password");
