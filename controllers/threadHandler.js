@@ -9,12 +9,12 @@ module.exports = () => {
       assert.equal(null, err);
       let col = client.db("test").collection("threads");
       col
-        .find()
-      .
+        .find({}, { projection: { reported: 0, delete_passwords: 0 ,"replies.delete_password": 0,"replies.reported": 0} })
         .sort("bumped_on", -1)
         .limit(10)
         .toArray((err, threads) => {
           assert.equal(null, err);
+        threads.
         });
     });
   };
