@@ -1,14 +1,23 @@
-'use strict';
+"use strict";
 
-const ThreatHandler = require('../controllers/threatHandler.js');
-const ReplyHandler = require('../controllers/replyHandler.js');
+const ThreadHandler = require("../controllers/threadHandler.js");
+const ReplyHandler = require("../controllers/replyHandler.js");
 
-module.exports = function (app) {
-  let threatHandler = new ThreatHandler();
+module.exports = function(app) {
+  var threadHandler = new ThreadHandler();//
   let replyHandler = new ReplyHandler();
-  
-  app.route('/api/threads/:board');
-    
-  app.route('/api/replies/:board');
 
+  app
+    .route("/api/threads/:board")
+    .get(threadHandler.threatList)
+    .post(threadHandler.newThreat)
+    .put(threadHandler.reportThreat)
+    .delete(threadHandler.deleteThreat);
+
+  app
+    .route("/api/replies/:board")
+    .get(replyHandler.replyList)
+    .post(replyHandler.newReply)
+    .put(replyHandler.reportReply)
+    .delete(replyHandler.deleteReply);
 };
