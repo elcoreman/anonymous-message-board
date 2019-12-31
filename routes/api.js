@@ -14,10 +14,10 @@ module.exports = function(app) {
     .put(threadHandler.reportThreat)
     .delete(threadHandler.deleteThreat);
 
-  /*app
+  app
     .route("/api/replies/:board")
     .get(replyHandler.replyList)
     .post(replyHandler.newReply)
     .put(replyHandler.reportReply)
-    .delete(replyHandler.deleteReply);*/
+    .delete(replyHandler.deleteReply);
 };
