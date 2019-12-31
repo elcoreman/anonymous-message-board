@@ -24,34 +24,31 @@ module.exports = () => {
         )
         .sort("bumped_on", -1)
         .limit(10)
-        .toArray((err, threads) => {
+        .toArray((err, docs) => {
           assert.equal(null, err);
-          threads.forEach(thread => {
-            thread.replycount = thread.replies.length;
-            if (thread.replies.length > 3)
-              thread.replies = thread.replies.slice(-3);
+          docs.forEach(doc => {
+            doc.replycount = doc.replies.length;
+            if (doc.replies.length > 3) doc.replies = doc.replies.slice(-3);
           });
-          res.json(threads);
+          res.json(docs);
         });
     });
   };
   this.newThreat = (req, res) => {
     let board = req.params.board;
-    let text = req.body.text;
-    let delete_password = req.body.delete_password;
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
       let col = client.db(DB).collection(board);
       col.insertOne(
         {
-          text,
-          delete_password,
+          text: req.body.text,
+          delete_password: req.body.delete_password,
           created_on: new Date(),
           bumped_on: new Date(),
           replies: [],
           reported: false
         },
-        (err, thread) => {
+        (err, doc) => {
           assert.equal(null, err);
           res.redirect("/b/" + board);
         }
@@ -68,7 +65,7 @@ module.exports = () => {
           _id: new ObjectId(req.body.report_id)
         },
         { $set: { reported: true } },
-        (err, thread) => {
+        (err, doc) => {
           assert.equal(null, err);
           res.send("reported");
         }
@@ -80,14 +77,15 @@ module.exports = () => {
     MongoClient.connect(DatabaseURI, (err, client) => {
       assert.equal(null, err);
       let col = client.db(DB).collection(board);
-      col.findOneAndUpdate(
+      col.findOneAndDelete(
         {
-          _id: new ObjectId(req.body.report_id)
+          _id: new ObjectId(req.body.report_id),
+          delete_password: req.body.delete_password
         },
-        { $set: { reported: true } },
-        (err, thread) => {
+        (err, doc) => {
           assert.equal(null, err);
-          res.send("reported");
+          if (doc.value === null) res.send("incorrect password");
+          else res.send("success");
         }
       );
     });
